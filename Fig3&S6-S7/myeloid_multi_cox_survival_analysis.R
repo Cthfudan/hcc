@@ -86,39 +86,3 @@ p = ggforest(model = cox, data = gene_score, fontsize = .5)
 
 saveRDS(gene_score, file = 'data/Myeloid_cell/prognosis/gene_score_prognosis.rds')
 
-# TREM2+ LAM signature prognosis ------------------------------------------
-
-clinical_df <- meta_sample %>% 
-  dplyr::select(patient, vital_status, days_to_death, days_to_last_follow_up, gender, age_at_index, ethnicity) ## select needed information for survival analysis
-
-clinical_df <- clinical_df %>% 
-  mutate(deceased = case_when(
-    vital_status == 'Alive' ~ FALSE, 
-    TRUE ~ TRUE
-  ))
-
-clinical_df$overall_survival <- ifelse(clinical_df$deceased, clinical_df$days_to_death, clinical_df$days_to_last_follow_up) # define the overall survival time
-
-clinical_df <- clinical_df %>% 
-  filter(!is.na(overall_survival))
-
-gene_score = gsva(expr = exp_mat, gset.idx.list = gene_sig[8], method = 'gsva', kcdf = 'Poisson', parallel.sz = 15)
-
-gene_score = gene_score[,colnames(gene_score) %in% rownames(clinical_df)]
-
-gene_score <- as.data.frame(gene_score) %>% 
-  mutate(futime = clinical_df$overall_survival, fustat = clinical_df$deceased, age = clinical_df$age_at_index, sex = clinical_df$gender)
-
-gene_score = gene_score %>% 
-  dplyr::select(futime, fustat, age, sex, everything())
-
-res_cut = surv_cutpoint(data = gene_score, time = 'futime', event = 'fustat', variables = 'gene_score', minprop = 0.25)
-summary(res_cut)
-
-res_cat = surv_categorize(res_cut) # categorize the continuous variable
-
-res_cat$futime = res_cat$futime/365
-
-ggsurvplot(survfit(Surv(futime, fustat) ~ gene_score, data = res_cat), pval = TRUE, palette = c("#377EB8", "#E41A1C"), conf.int = F, risk.table = T, size = .25)
-
-

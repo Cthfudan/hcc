@@ -69,5 +69,3 @@ seu_cd8_anno = RenameIdents(seu_cd8,
 DimPlot(seu_cd8_anno) + scale_color_npg()
 DimPlot(seu_cd8_anno, group.by = "response") + scale_color_npg()
 seu_cd8_anno$celltype = seu_cd8_anno@active.ident
-
-# tissue preference using OR value ...

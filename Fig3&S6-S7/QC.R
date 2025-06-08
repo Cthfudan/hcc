@@ -6,35 +6,7 @@ library(scrubletR)
 "%notin%" = Negate("%in%")
 
 # read data
-files = list.files(path = ".", full.names = T)
-
-samples = c("1423709", "1243709-P", "1243709-T", "1402216", "1402216-T", "1402216-P", "1413688", "1413688-P", "1413688-T", "1434320", "1434320-P", "1434320-T")
-
-patients = c(rep("1423709", 3), rep("1402216", 3), rep("1413688", 3), rep("1434320", 3))
-
-treatment = c("before", "after", "after", "before", "after", "after", "before", "after", "after", "before", "after", "after")
-
-seu_list = vector("list", length(samples))
-for(i in seq_along(samples)){
-  counts = Read10X(files[i])
-  seu = CreateSeuratObject(counts, min.cells = 3, min.features = 100)
-  seu$orig.ident = samples[i]
-  seu$patients = patients[i]
-  seu$treatment = treatment[i]
-  meta = seu@meta.data
-  meta = meta %>% 
-    mutate(site = case_when(
-      orig.ident %like% "-P$" ~ "T_after", 
-      orig.ident %like% "-T$" ~ "N_after", 
-      TRUE ~ "T_before"
-    ))
-  seu@meta.data = meta
-  seu_list[[i]] = seu
-}
-
-seu = merge(seu_list[[1]], 
-            c(seu_list[[2]], seu_list[[3]], seu_list[[4]], seu_list[[5]], seu_list[[6]], seu_list[[7]], seu_list[[8]], seu_list[[9]], seu_list[[10]], seu_list[[11]]), 
-            add.cell.ids = samples)
+seu = readRDS("data/seu_raw.rds")
 
 # preprocess
 
@@ -127,17 +99,3 @@ seu_anno = subset(seu_anno, celltype %notin% c("Doublets", "Doublet", "low quali
 seu_anno = RunUMAP(seu_anno, reduction = "harmony", dims = 1:20)
 saveRDS(seu_anno, file = "data/seu_anno_filtered.rds")
 saveRDS(markers, file = "data/markers_filter.rds")
-
-# add responsive and non-responsive information
-
-meta = seu_anno@meta.data
-
-meta = meta %>% 
-  mutate(response = case_when(
-    patients %in% c("1420765", "1434320") ~ "responsive", 
-    TRUE ~ "non-responsive"
-  ))
-
-seu_anno@meta.data = meta
-
-saveRDS(seu_anno, file = "data/seu_anno.rds")

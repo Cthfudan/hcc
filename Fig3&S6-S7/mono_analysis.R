@@ -214,10 +214,3 @@ OR.dist.mtx = mutate(OR.dist.mtx, R_c = case_when(
 OR.dist.mtx_c = OR.dist.mtx[, c(3, 4)]
 
 pheatmap::pheatmap(OR.dist.mtx_c, cluster_rows = F, cluster_cols = F, color = colorRampPalette(brewer.pal(n = 8, name = "Reds"))(60), border_color = NA)
-FeaturePlot(seu_mono, features = "C1QA")
-DimPlot(seu_mono, split.by = "condition") + scale_color_manual(values = c('#006DDBFF', '#F5CDCD', '#E2A7CC', '#378C4F', '#7464AA',  '#B6DBFFFF', '#6DB6FFFF', '#924900FF'))
-
-
-seu_macro = subset(seu_mono, celltype %in% c("TREM2+ SPP1+ macrophage", "FOLR2+ macrophage", "RTM-like TAM"))
-
-VlnPlot(seu_macro, features = c("TREM2", "SPP1", "GPNMB", "CTSC", "CD9", "MARCO", "FOLR2", "CD163", "CD5L"), group.by = "condition", cols = c("#E41A1C", "#377EB8"))

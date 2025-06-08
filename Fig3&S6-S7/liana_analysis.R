@@ -2,7 +2,7 @@ library(tidyverse)
 library(Seurat)
 library(liana)
 
-seu <- readRDS("~/Projects/SYF_pd-1/project/landscape/seu_full_anno.rds")
+seu <- readRDS("seu_anno.rds")
 
 table(seu$celltype)
 
@@ -74,26 +74,3 @@ DotPlot(seu_mye, features = c("SPP1"), group.by = "orig.ident", scale = TRUE)
 liana_heatmap()
 
 VlnPlot(seu_CD8T, features = c("IFNG", "TNF"), group.by = "treatment_response", pt.size = 0)
-
-seu_cd8t_anno = RenameIdents(seu_CD8T, 
-                            "0" = "Early effector memory T cells (CCR6+ CD8T)", 
-                            "1" = "Effector memory T cells (GZMK+ CD8T)", 
-                            "2" = "MAIT (CD161+ CD8T)", 
-                            "3" = "Effector T (IFNG+ CD8T)", 
-                            "4" = "NK cells", 
-                            "5" = "NKT cells", 
-                            "6" = "Effector T (TNF+ CD8T)", 
-                            "7" = "Effector T (IFNG+ CD8T)", 
-                            "8" = "CXCL13+ CD8T", 
-                            "9" = "Terminal effector T (PRF1+ GZMB+ CD8T)", 
-                            "10" = "NKT cells", 
-                            "11" = "Exhausted T (TIGIT+ CD8T)", 
-                            "12" = "MAIT (CD161+ CD8T)")
-
-DotPlot(seu_cd8t_anno, features = c("IFNG", "TNF"))
-
-seu_cd8t_anno$celltype = seu_cd8t_anno@active.ident
-meta = seu_cd8t_anno@meta.data
-
-meta = meta %>% 
-  filter(treatment_response %in% c("after_non-responsive", "after_responsive"))
