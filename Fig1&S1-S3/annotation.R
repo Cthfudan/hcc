@@ -1,4 +1,4 @@
-# snRNA -- annotation
+# scRNA/snRNA -- annotation
 
 # load libraries
 library(tidyverse)

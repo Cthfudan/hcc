@@ -117,6 +117,4 @@ DimPlot(seu_m, group.by = "patient_id") + scale_color_igv()
 
 DimPlot(seu_m, reduction = "umap", group.by = "condition")
 
-FeaturePlot(seu_m, features = 'CD44', min.cutoff = 'q10', max.cutoff = 'q90')
-
 saveRDS(seu_m, file = "seu_m.rds")
