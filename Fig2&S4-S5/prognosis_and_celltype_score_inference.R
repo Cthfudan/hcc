@@ -73,7 +73,7 @@ ggsurvplot(survfit(Surv(PFI.time, PFI) ~ group, data = surv_df), pval = TRUE, pa
 
 surv_df = surv_df %>% 
   mutate(group = case_when(
-    archtype1 > cut_g1 & `FOLR2+ TAM` > cut_g2 ~ "g1hg2h", 
+    archtype1 > cut_g1 & `TREM2+ LAM` > cut_g2 ~ "g1hg2h", 
     TRUE ~ "others"
   ))
 
@@ -108,9 +108,9 @@ cell_score = cell_score[rownames(cell_score) %in% surv_df$bcr_patient_barcode, ]
 
 surv_df = surv_df %>% 
   mutate(group = case_when(
-    archtype1 > cut_g1 & `FOLR2+ TAM` > cut_g2 ~ "g1hg2h", 
-    archtype1 > cut_g1 & `FOLR2+ TAM` <= cut_g2 ~ "g1hg2l", 
-    archtype1 <= cut_g1 & `FOLR2+ TAM` > cut_g2 ~ "g1lg2h", 
+    archtype1 > cut_g1 & `TREM2+ LAM` > cut_g2 ~ "g1hg2h", 
+    archtype1 > cut_g1 & `TREM2+ LAM` <= cut_g2 ~ "g1hg2l", 
+    archtype1 <= cut_g1 & `TREM2+ LAM` > cut_g2 ~ "g1lg2h", 
     TRUE ~ "g1lg2l"
   ))
 

@@ -142,7 +142,7 @@ myPrism <- new.prism(
 
 bp.res <- run.prism(prism = myPrism, n.cores=16)
 
-saveRDS(bp.res, file = "bp_result_sc_high_res_liri.rds")
+saveRDS(bp.res, file = "bp_result_sc.rds")
 
 slotNames(bp.res)
 
