@@ -86,9 +86,6 @@ mean_sqle = as.numeric(mean_sqle)
 
 df = data.frame(mean_sqle = mean_sqle, m_scores = m_scores)
 
-df[2, 2] = df[2, 2] + 0.10
-df[3, 2] = df[3, 2] + 0.05
-
 ggscatterstats(data = mean, x = mean, y = trem2)
 
 # calculate correlation between other TAMs

@@ -51,8 +51,6 @@ res_sh_down = res_SH_df %>%
 rownames(res_sh_down)[rownames(res_sh_down) %like% "Ccl"]
 rownames(res_sh_up)[rownames(res_sh_up) %like% "Ccl"]
 
-res_sh_up["Apob", ]
-
 # see specific genes expression 
 
 gene = "Hnf4a" # exapmle
