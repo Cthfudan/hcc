@@ -1,4 +1,4 @@
-# snRNA NMF -- assign meta0signature to each tumor cell
+# assign NMF metasignature to each tumor cell
 
 # load libraries
 library(NMF)
@@ -8,8 +8,6 @@ library(reshape2)
 library(ggsci)
 library(RColorBrewer)
 library(data.table)
-
-source("~/R/source_functions.R")
 
 # create a new seurat object, preserving meta.data signatures and removing dim reduction signatures
 snRNA_tumor <- readRDS("~/R/Projects/snRNA_scRNA_hcc/project/NMF/data/snRNA_tumor.rds")
@@ -97,24 +95,3 @@ for(i in patient){
 DimPlot(snRNA_nmf_list[["PT2"]], group.by = "archtype")
 
 saveRDS(snRNA_nmf_list, file = "snRNA_nmf_assigned.rds")
-
-# merge the meta together
-## Deprecated
-meta <- data.frame()
-for(i in patient){
-  snRNA <- snRNA_nmf_list[[i]]
-  metadata <- snRNA@meta.data
-  meta <- rbind(meta, metadata)
-}
-snRNA_tumor@meta.data <- meta
-
-DimPlot(snRNA_tumor, group.by = "archtype")
-
-saveRDS(snRNA_tumor, file = "data/snRNA_tumor_nmf_assigned.rds")
-
-snRNA_tumor = subset(snRNA_tumor, idents = c("Hepatocytes", "Cycling cell", "Bipotent progenitor"))
-
-markers = FindMarkers(snRNA_tumor, ident.1 = "archtype1", group.by = "archtype", test.use = "wilcox")
-
-markers = markers %>% 
-  arrange(desc(avg_log2FC))

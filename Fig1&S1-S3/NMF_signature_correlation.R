@@ -7,13 +7,8 @@ library(pagoda2)
 library(RColorBrewer)
 library(BBmisc)
 
-exp_mat = snRNA_tumor@assays$RNA@data
-
-exp_mat = as.matrix(exp_mat)
-
-## or
-
 exp_mat <- readRDS("~/R/Projects/snRNA_scRNA_hcc/project/NMF/data/exp_mat_sct.rds")
+metaGene <- readRDS("~/R/Projects/snRNA_scRNA_hcc/project/NMF/data/metaGene.rds")
 
 score_meta = map(metaGene, ~ score.cells.puram(data = t(exp_mat), signature = .x))
 

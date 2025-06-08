@@ -1,4 +1,4 @@
-# snRNA tumor --- NMF with refined process: refined normalization method and NMF algorithum
+# NMF calculation and visualization
 
 # Load libraries
 library(NMF)
@@ -20,25 +20,23 @@ nmf.options(maxIter = 12000, verbose = 1)
 # read data and metadata
 
 snRNA_list <- SplitObject(snRNA_tumor, split.by = "patient_id")
-
 patient <- names(snRNA_list)
 
-# Here, we need to normalize, scale each sample SAPERATELY, in case to involve bias 
 # run nmf
 topn <- 10000
 rank <- 10
 for(i in patient){
   # Create directory
-  if (!dir.exists("data/cnmf4")){
-    dir.create("data/cnmf4")
+  if (!dir.exists("data/cnmf")){
+    dir.create("data/cnmf")
   }
-  if (!dir.exists(paste("data/cnmf4", i, sep = "/"))){
-    dir.create(paste("data/cnmf4", i, sep = "/"))
+  if (!dir.exists(paste("data/cnmf", i, sep = "/"))){
+    dir.create(paste("data/cnmf", i, sep = "/"))
   }
   
   # nmf matrix processing
   
-  ## First, subset the seu obj to only contain protein genes and rm MT, Rbio genes
+  ## 1. subset the seu obj to only contain protein genes and rm MT, Rbio genes
   snRNA <- snRNA_list[[i]]
 
   ## MT and Ribo genes
@@ -61,11 +59,10 @@ for(i in patient){
   counts <- counts[rowSums(counts) > 0,] # keep only detected genes
   snRNA <- subset(snRNA, features = rownames(counts))
   
-  ## Second, doing SCTransform normalization
-  ## We won't need to contain nCount_RNA or mt_ratio, because it has been removed from our matrix
+  ## 2. do SCTransform normalization
   snRNA <- SCTransform(snRNA, vst.flavor = "v2", method = "glmGamPoi", verbose = F, return.only.var.genes = F)
   
-  ## Third, we will process the nmf matrix
+  ## 3. process the nmf matrix
   nmf_mat <- GetAssayData(snRNA, slot = "scale.data")
   nmf_mat[nmf_mat < 0] <- 0 # non-negative
   nmf_mat <- nmf_mat[rowSums(nmf_mat) > 0,] # remove zero-sum rows
@@ -76,30 +73,29 @@ for(i in patient){
   nmf_mat <- nmf_mat[,ina] # remove column with NA values
   
   # run nmf
-  ## We will use "nndsvd" method to perform concensus NMF
+  ## use "nndsvd" method to perform concensus NMF
   res <- nmf(nmf_mat, rank = rank, method = "brunet", seed = "nndsvd", .options = "p20v1")
-  
-  ## better, we will next try to compare multiple algorithms in nmf, and choose the best one
-  
+
   # extract signature
   signature <- NMF::basis(res)
   colnames(signature) <- paste(i, 1:rank, sep = "_")
   signature <- as.data.frame(signature)
   
   # save data
-  write.table(signature, paste0("data/cnmf4/", i, "/signature_", topn, ".txt"), sep = "\t")
-  saveRDS(res, file = paste0("data/cnmf4/", i, "/result_", rank, ".rds"))
+  write.table(signature, paste0("data/cnmf/", i, "/signature_", topn, ".txt"), sep = "\t")
+  saveRDS(res, file = paste0("data/cnmf/", i, "/result_", rank, ".rds"))
   print(paste0("NMF for ", i, " is done!"))
 }
 
 #################################################################################
-# Extract NMF program
 
+# Extract NMF program
 topn <- 10000
 ranks <- 10
 topRank <- 100
 programG <- list()
 patient <- c('PT1', 'PT2', 'PT3', 'PT4', 'PT5', 'PT6', 'PT7', 'PT8', 'PT9', 'PT10', 'PT11', 'PT12')
+
 ## extract program
 for (i in seq_along(patient)){
   filedir <- paste0("./nmf_res/", patient[i], "/signature_", topn, ".txt")
@@ -183,7 +179,6 @@ score_f <- score_mat[,colnames(score_mat) %in% sds_f$program]
 #######################################################################################
 
 # calculate the correlation and visualization
-
 library(corrplot)
 pear_cor <- cor(x = score_mat, method = "pearson")
 
@@ -200,12 +195,11 @@ pear_cor_hc <- pear_cor[cororder, cororder]
 pear_dist <- as.dist(1 - pear_cor_hc)
 
 # Extract program
-
 tree <- hclust(as.dist(1 - pear_cor_hc), method = "ward.D2")
 clus <- cutree(tree, 9)
 table(clus)
 
-# 提取signature
+# Extract signature
 ProSig <- split(names(clus), clus) 
 names(ProSig) <- paste0("tumorsig", names(ProSig))
 ProSig <- lapply(ProSig, function(z){
@@ -223,7 +217,6 @@ patientLoading <- lapply(patient, function(z){
 AllLoading <- Reduce(function(x, y)merge(x = x, y = y, by = "Gene", all = T), patientLoading)
 head(AllLoading)
 
-
 metaGene <- list()
 for (i in 1:length(metalist)){
   programs <- metalist[[i]]
@@ -240,6 +233,7 @@ metaGene_top50[[3]]
 saveRDS(metaGene, file = 'metaGene_top50.rds')
 saveRDS(metaGene, file = "metaGene_top30.rds")
 
+# save metaGene and enrichment results
 library(org.Hs.eg.db)
 library(clusterProfiler)
 library(enrichplot)
@@ -267,16 +261,6 @@ cluster = clus[rownames(col_anno)]
 col_anno$cluster = as.character(cluster)
 anno_color = as.character(paletteer_d("colorBlindness::paletteMartin"))[2:13]
 names(anno_color) = patient
-pheatmap(mat = pear_cor_hc, 
-         color = colorRampPalette(c('white', '#F9F6B7', '#F4E228', '#E61A13', '#330204'))(100),
-         clustering_distance_rows = pear_dist, 
-         clustering_distance_cols = pear_dist, 
-         clustering_method = "ward.D2",
-         show_colnames = F, 
-         show_rownames = F, 
-         annotation_col = col_anno, 
-         annotation_colors = list(patients = anno_color))
-)
 
 pheatmap(mat = pear_cor_hc, 
          color = colorRampPalette(c('white', '#FCFFC9', '#F4E228', '#E61A13', '#5A1833', '#1D0B14'))(50),
