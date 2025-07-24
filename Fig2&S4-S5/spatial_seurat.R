@@ -145,7 +145,7 @@ anchors_sc <- FindTransferAnchors(reference = scRNA_reference, query = seu, norm
 anchors_sn <- FindTransferAnchors(reference = snRNA_reference, query = seu, normalization.method = "SCT")
 
 predictions.assay.sc <- TransferData(anchorset = anchors_sc, refdata = scRNA_reference$celltype, prediction.assay = TRUE,
-                                     weight.reduction = seu[["pca"]], dims = 1:30, k.weight = 44)
+                                     weight.reduction = seu[["pca"]], dims = 1:30)
 predictions.assay.sn <- TransferData(anchorset = anchors_sn, refdata = snRNA_reference$new_celltype, prediction.assay = TRUE,
                                      weight.reduction = seu[["pca"]], dims = 1:30)
 
@@ -174,13 +174,6 @@ SpatialFeaturePlot(seu, features = "B cells")
 SpatialFeaturePlot(seu, features = "Plasma cells")
 SpatialFeaturePlot(seu, features = "Myeloid cells")
 
-VlnPlot(scRNA, features = "CD2")
-
-dat = seu@assays$predictions_sn@data
-
-dat["archtype1", ][dat["archtype1", ] <= 0.90] = 0.90
-
-seu@assays$predictions_sn@data = dat
 # spatial niche (correlation) analysis
 
 sc_pred = seu2@assays$predictions_sc@data
@@ -188,13 +181,9 @@ sc_pred = seu2@assays$predictions_sc@data
 sn_pred = seu2@assays$predictions_sn@data
 
 sc_pred = sc_pred[rownames(sc_pred) != "Hepatocytes", ]
-sc_pred = sc_pred[rownames(sc_pred) != "Proliferating T", ]
-sc_pred = sc_pred[rownames(sc_pred) != "Proliferating EC", ]
-sc_pred = sc_pred[rownames(sc_pred) != "inflammatory", ]
 sc_pred = sc_pred[rownames(sc_pred) != "max", ]
 
 sc_pred = sc_pred[rowSums(sc_pred) > 0, ]
-sc_pred = sc_pred[rownames(sc_pred) != "IFN-TAM", ]
 
 apply(sc_pred, 1, sum) > 1
 
