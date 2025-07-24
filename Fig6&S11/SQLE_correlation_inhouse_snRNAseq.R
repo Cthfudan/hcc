@@ -39,7 +39,7 @@ seu = NormalizeData(seu)
 table(seu$int_clusters)
 
 seu = subset(seu, sampletype == "snRNA-seq")
-seu = subset(seu, condition %in% c("PT", "RT"))
+seu = subset(seu, condition %in% c("PT"))
 
 table(seu$int_clusters)
 
