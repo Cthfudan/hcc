@@ -67,7 +67,7 @@ deg_ox_CM = res_ox_CM_table %>%
 gene_id = mapIds(keys = c(rownames(deg_ox_CM)), x = org.Mm.eg.db, keytype = 'SYMBOL', column = 'ENTREZID')
 
 # enrichgo
-enrich_ox_CM_go = enrichGO(gene = c(rownames(deg_ox_CM), "Trem2", "Spp1", "Cebpa"), OrgDb = org.Mm.eg.db, keyType = 'SYMBOL', ont = 'BP')
+enrich_ox_CM_go = enrichGO(gene = rownames(deg_ox_CM), OrgDb = org.Mm.eg.db, keyType = 'SYMBOL', ont = 'BP')
 enrich_go_table = as.data.frame(enrich_ox_CM_go)
 
 # enrichkegg
